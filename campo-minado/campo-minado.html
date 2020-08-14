@@ -1,0 +1,227 @@
+<html lang="en">
+<head title="Campo Minado">
+    <style>
+        .cabecalho {
+            width: 100%;
+            background-color: #1a7fb0;
+            color: #ccecf8;
+            padding: 10px;
+            text-align: center;
+        }
+        .titulo {
+            text-align: center;
+            font-size: 28px;
+            font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+        }
+        .margem {
+            margin: 5px;
+            padding: 5px;
+        }
+        .tabuleiro {
+            text-align: center;
+            margin-top: 10px;
+        }
+        .botao {
+            border: 0;
+            background-color: #ccecf8;
+            color: #1a7fb0;
+        }
+        .fundo {
+            background-color: #283C5A;
+        }
+    </style>
+</head>
+<body class="fundo">
+
+<div class="cabecalho">
+    <label class="titulo">Campo Minado</label><br/>
+    <button onclick="location.reload()" class="botao margem">Recarregar</button>
+</div>
+
+<div class="tabuleiro">
+    <canvas id="theCanvas" width="500" height="500"></canvas>
+</div>
+
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/processing.js/1.6.6/processing.min.js"></script>
+
+<script type="text/processing" data-processing-target="theCanvas">
+
+// Jogo Campo Minado em Java usando Processing para gerar a tela
+// Enjoy!!
+
+    int[][] minas;
+    boolean[][] conquistas;
+    boolean[][] caminhoAberto;
+
+    int larguraGrid = 8;
+    int alturaGrid = 8;
+    int tamanhoCampo = 50;
+    int numMinas = 10;
+    boolean clickInicial=true;
+
+    void setup() {
+      size(larguraGrid * tamanhoCampo, alturaGrid * tamanhoCampo);
+      minas=new int[larguraGrid][alturaGrid];
+      conquistas = new boolean[larguraGrid][alturaGrid];
+      caminhoAberto = new boolean[larguraGrid][alturaGrid];
+
+      for (int x = 0; x < larguraGrid; x++) {
+        for (int y = 0; y<alturaGrid; y++) {
+          minas[x][y] = 0;
+          conquistas[x][y] = false;
+          caminhoAberto[x][y] = false;
+        }
+      }
+    }
+    void colocarMinas(){
+      int idx = 0;
+      while(idx<numMinas) {
+        int x=int(random(larguraGrid));
+        int y=int(random(alturaGrid));
+        if(minas[x][y] == 1)continue;
+        minas[x][y] = 1;
+        idx++;
+      }
+    }
+    void limparMinas() {
+      for(int x=0; x<larguraGrid; x++){
+        for(int y=0; y<alturaGrid; y++){
+          minas[x][y] = 0;
+        }
+      }
+    }
+
+    void desarmar(int x,int y){
+
+      if (isLimite(x,y)) return;
+      if (caminhoAberto[x][y]) return;
+      caminhoAberto[x][y] = true;
+      if (calcularProximo(x,y) > 0) return;
+
+      desarmar(x-1, y-1);
+      desarmar(x-1, y+1);
+      desarmar(x+1, y-1);
+      desarmar(x+1, y+1);
+
+      desarmar(x-1, y);
+      desarmar(x+1, y);
+      desarmar(x, y-1);
+      desarmar(x, y+1);
+    }
+
+
+    void mousePressed() {
+      int x = int(mouseX / tamanhoCampo);
+      int y = int(mouseY / tamanhoCampo);
+
+      if (mouseButton == RIGHT) {
+
+        conquistas[x][y]=!conquistas[x][y];
+        return;
+
+      } else {
+        if (clickInicial) {
+          clickInicial = false;
+          do {
+            limparMinas();
+            colocarMinas();
+          } while (minas[x][y]!= 0);
+        }
+
+        if (minas[x][y] != 0) {
+
+          noStroke();
+          textAlign(LEFT, TOP);
+          textSize(tamanhoCampo);
+          text("Bomba");
+
+          //Detonou a Bomba
+          alert("Bomba!! Tente novamente");
+
+          exit();
+          location.reload();
+        } else {
+          desarmar(x,y);
+        }
+      }
+    }
+
+    boolean isLimite(int x,int y) {
+      return x < 0||y < 0||x >= larguraGrid||y >= alturaGrid;
+    }
+
+    int calcularProximo(int x,int y){
+      int indice = 0;
+      if (isLimite(x,y)) {
+        return 0;
+      }
+
+      for(int oX=-1; oX<=1; oX++) {
+
+        for(int oY=-1; oY<=1; oY++) {
+
+          if (isLimite(oX+x,oY+y)) {
+            continue;
+          }
+          indice += minas[oX+x][oY+y];
+        }
+      }
+      return indice;
+    }
+
+    // estilo grafico do tabuleiro
+    void draw() {
+      background(0);
+
+      for (int x = 0; x < larguraGrid; x++) {
+
+        for (int y = 0; y < alturaGrid; y++) {
+
+           // cores das celulas do tabuleiro
+          color col1 = color(45, 125, 215);
+          color col2 = color(230, 150, 15);
+
+          color corTexto = color(0);
+
+          int proximo = calcularProximo(x,y);
+
+          if (conquistas[x][y]) {
+            col1 = color(245, 170, 15);
+            col2 = color(235, 25, 20);
+          } else if (caminhoAberto[x][y]) {
+            col1 = color(145);
+            col2 = color(145);
+          }
+
+          boolean alternar = (x+y)%2 == 0;
+          if (alternar) {
+            fill(col2);
+            stroke(col2);
+          } else {
+            fill(col1);
+            stroke(col1);
+          }
+
+          if (proximo == 1) corTexto = color(125, 125, 215);
+          if (proximo == 2) corTexto = color(125, 215, 50);
+          if (proximo == 3) corTexto = color(245, 170, 15);
+          if (proximo == 4) corTexto = color(20, 100, 235);
+          if (proximo == 5) corTexto = color(245, 170, 15);
+
+          rect(x*tamanhoCampo, y*tamanhoCampo, tamanhoCampo, tamanhoCampo);
+
+          if (proximo > 0 && caminhoAberto[x][y]) {
+            fill(corTexto);
+            noStroke();
+            textAlign(LEFT, TOP);
+            textSize(tamanhoCampo);
+
+            text("" + proximo, x*tamanhoCampo, y*tamanhoCampo);
+          }
+        }
+      }
+    }
+</script>
+
+</body>
+</html>
