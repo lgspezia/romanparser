@@ -19,7 +19,7 @@ public class CampoMinado extends JFrame {
 
     	quadro = new JLabel("");
         add(quadro, BorderLayout.SOUTH);
-        add(new Board(quadro));
+        add(new Tabuleiro(quadro));
         setResizable(false);
         pack();
 
