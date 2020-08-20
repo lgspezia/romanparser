@@ -1,4 +1,4 @@
-package com.zetcode;
+package mines;
 
 import java.awt.Dimension;
 import java.awt.Graphics;
