@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-public class Game {	
+public class Game {
 
     int[][] minas;
     boolean[][] conquistas;
@@ -99,5 +99,57 @@ public class Game {
       }
       return indice;
     }
+
+
+    // Desenho do Tabuleiro
+    public void desenharTabuleiro() {
+    	
+		for (int x = 0; x < larguraGrid; x++) {
 	
+	        for (int y = 0; y < alturaGrid; y++) {
+	
+	           // Cores das celulas do tabuleiro
+	          String col1 = "--";
+	          String col2 = "XX";
+	
+	          String corTexto = "00";
+	          String colcheteFundo = "[ ]";
+	          String chavesFundo = "( )";
+	          
+	
+	          int proximo = calcularProximo(x,y);
+	
+	          if (conquistas[x][y]) {
+	            col1 = chavesFundo;
+	            col2 = colcheteFundo;
+	          } else if (caminhoAberto[x][y]) {
+	            col1 = colcheteFundo;
+	            col2 = chavesFundo;
+	          }
+	
+	          boolean alternar = (x+y)%2 == 0;
+	          if (alternar) {	            
+	            System.out.println(col2);
+	          } else {
+	        	System.out.println(col1);	            
+	          }
+	
+	          if (proximo == 1) corTexto = col2;
+	          if (proximo == 2) corTexto = col1;
+	          if (proximo == 3) corTexto = colcheteFundo;
+	          if (proximo == 4) corTexto = chavesFundo;
+	          if (proximo == 5) corTexto = col1;
+	          if (proximo == 6) corTexto = col2;
+	
+	          // rect(x*tamanhoCampo, y*tamanhoCampo, tamanhoCampo, tamanhoCampo);
+	          System.out.println(x*tamanhoCampo + y*tamanhoCampo + tamanhoCampo + tamanhoCampo);
+	
+	          if (proximo > 0 && caminhoAberto[x][y]) {
+	        	  System.out.println(corTexto);
+	          }
+	        }
+	      }
+
+    }
+
 }
